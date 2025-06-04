@@ -1,0 +1,181 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>Your Wallet</h2>
+                <div>
+                    <span class="badge bg-info">Current Date: {{ current_date }}</span>
+                    <button id="advance-day" class="btn btn-primary ms-2">Advance Day</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="wallet-info">
+                    <div class="wallet-card total-wallet">
+                        <h3>Total Value</h3>
+                        <p id="total-value">€{{ "%.2f"|format(wallet.total) }}</p>
+                    </div>
+                    <div class="wallet-card invested">
+                        <h3>Invested</h3>
+                        <p id="invested-value">€{{ "%.2f"|format(wallet.invested) }}</p>
+                    </div>
+                    <div class="wallet-card uninvested">
+                        <h3>Available</h3>
+                        <p id="uninvested-value">€{{ "%.2f"|format(wallet.uninvested) }}</p>
+                    </div>
+                </div>
+                
+                <canvas id="walletChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h2>Your Portfolio</h2>
+            </div>
+            <div class="card-body">
+                {% if portfolio %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                            <th>Avg. Buy Price</th>
+                            <th>Current Price</th>
+                            <th>Total Value</th>
+                            <th>Profit/Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfolio-table">
+                        <!-- Portfolio data will be loaded here -->
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="alert alert-info">
+                    You don't have any stocks in your portfolio yet. Go to the Buy/Sell page to start investing!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize wallet chart
+    let walletChart;
+    
+    // Fetch wallet history and create chart
+    fetch('/api/wallet-history')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('walletChart').getContext('2d');
+            walletChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(item => item.date),
+                    datasets: [{
+                        label: 'Wallet Value (€)',
+                        data: data.map(item => item.value),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        });
+    
+    // Load portfolio data
+    function loadPortfolio() {
+        fetch('/api/portfolio-data')
+            .then(response => response.json())
+            .then(data => {
+                const portfolioTable = document.getElementById('portfolio-table');
+                
+                if (Object.keys(data.portfolio).length === 0) {
+                    document.querySelector('.card-body table').style.display = 'none';
+                    const emptyMessage = document.createElement('div');
+                    emptyMessage.className = 'alert alert-info';
+                    emptyMessage.textContent = "You don't have any stocks in your portfolio yet. Go to the Buy/Sell page to start investing!";
+                    document.querySelector('.card-body').appendChild(emptyMessage);
+                    return;
+                }
+                
+                portfolioTable.innerHTML = '';
+                
+                for (const [symbol, stock] of Object.entries(data.portfolio)) {
+                    const currentPrice = data.stocks[symbol].price;
+                    const totalValue = currentPrice * stock.quantity;
+                    const profitLoss = totalValue - (stock.avg_price * stock.quantity);
+                    const profitLossPercent = ((currentPrice - stock.avg_price) / stock.avg_price) * 100;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${symbol}</td>
+                        <td>${stock.name}</td>
+                        <td>${stock.quantity}</td>
+                        <td>€${stock.avg_price.toFixed(2)}</td>
+                        <td>€${currentPrice.toFixed(2)}</td>
+                        <td>€${totalValue.toFixed(2)}</td>
+                        <td class="${profitLoss >= 0 ? 'text-success' : 'text-danger'}">
+                            €${profitLoss.toFixed(2)} (${profitLossPercent.toFixed(2)}%)
+                        </td>
+                    `;
+                    portfolioTable.appendChild(row);
+                }
+            });
+    }
+    
+    // Advance day button
+    document.getElementById('advance-day').addEventListener('click', function() {
+        fetch('/api/advance-day', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update date
+                document.querySelector('.badge').textContent = `Current Date: ${data.new_date}`;
+                
+                // Update wallet values
+                document.getElementById('total-value').textContent = `€${data.wallet.total.toFixed(2)}`;
+                document.getElementById('invested-value').textContent = `€${data.wallet.invested.toFixed(2)}`;
+                document.getElementById('uninvested-value').textContent = `€${data.wallet.uninvested.toFixed(2)}`;
+                
+                // Update chart
+                walletChart.data.labels.push(data.new_date);
+                walletChart.data.datasets[0].data.push(data.wallet.total);
+                walletChart.update();
+                
+                // Reload portfolio
+                loadPortfolio();
+            }
+        });
+    });
+    
+    // Add portfolio data endpoint
+    if (window.location.pathname === '/') {
+        loadPortfolio();
+    }
+</script>
+{% endblock %}

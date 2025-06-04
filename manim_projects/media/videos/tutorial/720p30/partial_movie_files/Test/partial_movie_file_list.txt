@@ -1,0 +1,8 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/danie/python_programs/manim_projects/media/videos/tutorial/720p30/partial_movie_files/Test/2016333726_296246733_223132457.mp4'
+file 'file:C:/Users/danie/python_programs/manim_projects/media/videos/tutorial/720p30/partial_movie_files/Test/543634251_2512329331_603258301.mp4'
+file 'file:C:/Users/danie/python_programs/manim_projects/media/videos/tutorial/720p30/partial_movie_files/Test/543634251_100457558_82540709.mp4'
+file 'file:C:/Users/danie/python_programs/manim_projects/media/videos/tutorial/720p30/partial_movie_files/Test/543634251_3048418017_3784452449.mp4'
+file 'file:C:/Users/danie/python_programs/manim_projects/media/videos/tutorial/720p30/partial_movie_files/Test/543634251_3584955873_4282945254.mp4'
+file 'file:C:/Users/danie/python_programs/manim_projects/media/videos/tutorial/720p30/partial_movie_files/Test/543634251_828730911_276541735.mp4'
+file 'file:C:/Users/danie/python_programs/manim_projects/media/videos/tutorial/720p30/partial_movie_files/Test/543634251_1733944848_1137141411.mp4'

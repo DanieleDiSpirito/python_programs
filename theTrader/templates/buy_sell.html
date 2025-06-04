@@ -1,0 +1,270 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h2>Your Wallet</h2>
+            </div>
+            <div class="card-body">
+                <div class="wallet-info">
+                    <div class="wallet-card total-wallet">
+                        <h3>Total Value</h3>
+                        <p>€{{ "%.2f"|format(wallet.total) }}</p>
+                    </div>
+                    <div class="wallet-card uninvested">
+                        <h3>Available</h3>
+                        <p>€{{ "%.2f"|format(wallet.uninvested) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Select Stock</h2>
+            </div>
+            <div class="card-body">
+                <select id="stock-selector" class="form-select mb-3">
+                    {% for symbol, stock in stocks.items() %}
+                    <option value="{{ symbol }}" {% if symbol == selected_stock %}selected{% endif %}>
+                        {{ symbol }} - {{ stock.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                
+                <div class="d-grid gap-2">
+                    <button id="view-stock" class="btn btn-primary">View Stock</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>Your Portfolio</h2>
+            </div>
+            <div class="card-body">
+                {% if portfolio %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for symbol, data in portfolio.items() %}
+                        <tr>
+                            <td>{{ symbol }}</td>
+                            <td>{{ data.quantity }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="alert alert-info">
+                    You don't have any stocks yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 id="stock-title">{{ selected_stock }} - {{ stock_data.name }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Current Price:</strong> <span id="current-price">€{{ "%.2f"|format(stock_data.price) }}</span>
+                </div>
+                
+                <canvas id="stockChart" width="400" height="200"></canvas>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h3>Buy</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="buy-form">
+                                    <div class="mb-3">
+                                        <label for="buy-quantity" class="form-label">Quantity</label>
+                                        <input type="number" class="form-control" id="buy-quantity" min="1" value="1">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Total Cost</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="text" class="form-control" id="buy-total" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-success">Buy</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-danger text-white">
+                                <h3>Sell</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="sell-form">
+                                    <div class="mb-3">
+                                        <label for="sell-quantity" class="form-label">Quantity</label>
+                                        <input type="number" class="form-control" id="sell-quantity" min="1" value="1">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Total Value</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="text" class="form-control" id="sell-total" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-danger">Sell</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let stockChart;
+    let currentPrice = {{ stock_data.price }};
+    let currentSymbol = "{{ selected_stock }}";
+    
+    // Load stock data and create chart
+    function loadStockData(symbol) {
+        fetch(`/api/stock-history/${symbol}`)
+            .then(response => response.json())
+            .then(data => {
+                // Update chart
+                if (stockChart) {
+                    stockChart.destroy();
+                }
+                
+                const ctx = document.getElementById('stockChart').getContext('2d');
+                stockChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(item => item.date),
+                        datasets: [{
+                            label: `${symbol} Price (€)`,
+                            data: data.map(item => item.price),
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            });
+    }
+    
+    // Initialize
+    loadStockData(currentSymbol);
+    
+    // Update buy total
+    document.getElementById('buy-quantity').addEventListener('input', function() {
+        const quantity = parseInt(this.value) || 0;
+        document.getElementById('buy-total').value = (quantity * currentPrice).toFixed(2);
+    });
+    
+    // Update sell total
+    document.getElementById('sell-quantity').addEventListener('input', function() {
+        const quantity = parseInt(this.value) || 0;
+        document.getElementById('sell-total').value = (quantity * currentPrice).toFixed(2);
+    });
+    
+    // Initialize totals
+    document.getElementById('buy-total').value = currentPrice.toFixed(2);
+    document.getElementById('sell-total').value = currentPrice.toFixed(2);
+    
+    // View stock button
+    document.getElementById('view-stock').addEventListener('click', function() {
+        const symbol = document.getElementById('stock-selector').value;
+        window.location.href = `/buy-sell?stock=${symbol}`;
+    });
+    
+    // Buy form
+    document.getElementById('buy-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const quantity = parseInt(document.getElementById('buy-quantity').value);
+        
+        if (quantity <= 0) {
+            alert('Please enter a valid quantity');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('symbol', currentSymbol);
+        formData.append('quantity', quantity);
+        
+        fetch('/api/buy', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Successfully bought ${quantity} shares of ${currentSymbol}`);
+                window.location.reload();
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        });
+    });
+    
+    // Sell form
+    document.getElementById('sell-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const quantity = parseInt(document.getElementById('sell-quantity').value);
+        
+        if (quantity <= 0) {
+            alert('Please enter a valid quantity');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('symbol', currentSymbol);
+        formData.append('quantity', quantity);
+        
+        fetch('/api/sell', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Successfully sold ${quantity} shares of ${currentSymbol}`);
+                window.location.reload();
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        });
+    });
+</script>
+{% endblock %}
