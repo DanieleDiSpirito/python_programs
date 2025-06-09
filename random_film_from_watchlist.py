@@ -3,6 +3,7 @@ import requests
 from random import choice
 from time import sleep
 from sys import argv, stdout
+from tqdm import tqdm
 
 GAP_TIME = 0.03
 
@@ -37,12 +38,17 @@ def main():
 
     sprint('Looking for your new favorite movie...')
 
-    try:
-        # 1 page --> 28 films
-        for i in range(1, 7+1):  # the n. of pages now are 7 (168 < nFilms < 196)
-            r = requests.get(watchlist_page + str(i), headers=headers)
-            bs = BeautifulSoup(r.text, 'html.parser')
+    curr_page = 1
 
+    try:
+        r = requests.get(watchlist_page + str(curr_page), headers=headers)
+        bs = BeautifulSoup(r.text, 'html.parser')
+        count = bs.find('span', class_='js-watchlist-count')
+        remain = int(count.text.split()[0])
+        for curr_page in tqdm(range(1, (remain-1) // 28 + 2)): # 1 page == 28 films
+            if curr_page != 1:
+                r = requests.get(watchlist_page + str(curr_page), headers=headers)
+                bs = BeautifulSoup(r.text, 'html.parser')
             ul = bs.find('ul', class_='poster-list')
             li_s = ul.find_all('li', class_='poster-container')
             for li in li_s:
