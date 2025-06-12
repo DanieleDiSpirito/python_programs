@@ -40,6 +40,11 @@ def main():
 
     curr_page = 1
 
+    req_to_img = False
+    if len(argv) > 2 and argv[2] == '--img':
+        req_to_img = True
+        sprint('Images will be requested.')
+    
     try:
         r = requests.get(watchlist_page + str(curr_page), headers=headers)
         bs = BeautifulSoup(r.text, 'html.parser')
@@ -54,15 +59,27 @@ def main():
             for li in li_s:
                 div = li.find('div')
                 link = div.get('data-target-link')
-                img = li.find('img')
-                name = img.get('alt')
-                films.append({'link': link, 'name': name})
-    except AttributeError:
-        sprint('No users found! (Maybe the user has a private account!)')
+                img_req = div.get('data-cache-busting-key')
+                img_div = li.find('img')
+                name = img_div.get('alt')
+                if img_req and req_to_img:
+                    r2 = requests.get(url + '/ajax/poster/' + link + '/std/125x187/?k=' + img_req, headers=headers)
+                    bs2 = BeautifulSoup(r2.text, 'html.parser')
+                    img = bs2.find('img').get('src')
+                    films.append({'link': link, 'name': name, 'img': img})
+                elif img_req is None and req_to_img:
+                    films.append({'link': link, 'name': name, 'img': None})
+                else: films.append({'link': link, 'name': name})
+    except AttributeError as e:
+        sprint('No users found! (Maybe the user has a private account!)\n' + str(e))
         return
 
     film = choice(films)
-    sprint(f'''And the Oscar goes to... {film['name']}!\nLink: {url}{film['link']}''')
+    if req_to_img:
+        sprint(f'''And the Oscar goes to... {film['name']}!\nLink: {url}{film['link']}\nImage: {film['img']}''')
+    else:
+        sprint(f'''And the Oscar goes to... {film['name']}!\nLink: {url}{film['link']}''')
+    sprint('Enjoy your movie!')
 
 
 if __name__ == '__main__':
