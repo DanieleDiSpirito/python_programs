@@ -1,7 +1,7 @@
 from playwright.sync_api import sync_playwright
 import csv
 
-url = 'https://elezioni.interno.gov.it/risultati/20250608/referendum/votanti/italia/05'
+url = 'https://elezioni.interno.gov.it/risultati/20250608/referendum/votanti/italia/'
 
 cod = [
     [2, 7, 96, 27, 52, 81, 102, 88],
@@ -26,31 +26,31 @@ cod = [
     [17, 53, 95, 73]
 ]
 
-perc = {}
-
 QUERY_NAME = '.riga_noclick > td:nth-child(1) > p, .riga > td:nth-child(1) > p'
 QUERY_VALUE = '.riga_noclick > td:nth-child(7) > p, .riga > td:nth-child(7) > p'
 
-for idx, x in enumerate(cod):
-    for y in x:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url + str(idx+1).zfill(2) + str(y).zfill(3), wait_until="networkidle")
-            print(  \
-                page.locator('#tabella > div.q-table__container.q-table--horizontal-separator.column.no-wrap.q-table__card.q-table--no-wrap.tabella.tabella_votanti > div.q-table__top.relative-position.row.items-center > div:nth-child(1) > p').text_content(), \
-                ': ', page.locator(QUERY_NAME).count(), sep='' \
-            )
-            for i in range(0, page.locator(QUERY_NAME).count()):
-                name = page.locator(QUERY_NAME).nth(i).text_content()
-                value = page.locator(QUERY_VALUE).nth(i).text_content()
-                try:
-                    perc[name] = float(value.replace(',', '.'))
-                except:
-                    perc[name] = None
+for V in range(1, 6):
+    perc = {}
+    for idx, x in enumerate(cod):
+        for y in x:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page()
+                page.goto(url + str(V).zfill(2) + str(idx+1).zfill(2) + str(y).zfill(3), wait_until="networkidle")
+                print(  \
+                    provincia := page.locator('#tabella > div.q-table__container.q-table--horizontal-separator.column.no-wrap.q-table__card.q-table--no-wrap.tabella.tabella_votanti > div.q-table__top.relative-position.row.items-center > div:nth-child(1) > p').text_content(), \
+                    ': ', page.locator(QUERY_NAME).count(), sep='' \
+                )
+                for i in range(0, page.locator(QUERY_NAME).count()):
+                    name = page.locator(QUERY_NAME).nth(i).text_content() + ' (' + provincia.split(' ')[-1] + ')'
+                    value = page.locator(QUERY_VALUE).nth(i).text_content()
+                    try:
+                        perc[name] = float(value.replace(',', '.'))
+                    except:
+                        perc[name] = None
 
-with open("percentuale.csv", "w", newline="") as f:
-    writer = csv.writer(f, delimiter=';')
-    writer.writerow(["Comune", "Percentuale"])  # header row
-    for comune, percentuale in perc.items():
-        writer.writerow([comune, percentuale])
+    with open(f"percentuale{str(V).zfill(2)}.csv", "w", newline="") as f:
+        writer = csv.writer(f, delimiter=';')
+        writer.writerow(["Comune", "Percentuale"])  # header row
+        for comune, percentuale in perc.items():
+            writer.writerow([comune, percentuale])
