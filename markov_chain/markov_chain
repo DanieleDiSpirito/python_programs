@@ -1,0 +1,14 @@
+digraph {
+	rankdir=LR size=10
+	A [fillcolor=lightblue shape=circle style=filled]
+	B [fillcolor=lightblue shape=circle style=filled]
+	C [fillcolor=lightblue shape=circle style=filled]
+	A -> A [label=0.20]
+	A -> B [label=0.40]
+	A -> C [label=0.40]
+	B -> A [label=0.30]
+	B -> C [label=0.70]
+	C -> A [label=0.50]
+	C -> B [label=0.30]
+	C -> C [label=0.20]
+}
