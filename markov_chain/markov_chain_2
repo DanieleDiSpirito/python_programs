@@ -1,0 +1,15 @@
+digraph {
+	rankdir=LR size=10
+	0 [fillcolor=green shape=circle style=filled]
+	1 [fillcolor=green shape=circle style=filled]
+	2 [fillcolor=green shape=circle style=filled]
+	0 -> 0 [label=0.50]
+	0 -> 1 [label=0.20]
+	0 -> 2 [label=0.30]
+	1 -> 0 [label=0.60]
+	1 -> 1 [label=0.20]
+	1 -> 2 [label=0.20]
+	2 -> 0 [label=0.10]
+	2 -> 1 [label=0.80]
+	2 -> 2 [label=0.10]
+}
