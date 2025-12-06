@@ -3,16 +3,17 @@ import bs4
 from sys import argv
 import re
 from sys import stdout
+from gensim.models import KeyedVectors
+import gensim.downloader as api
 from os.path import expanduser
 from time import perf_counter
 from functools import lru_cache
-import pickle
+
 
 class IllegalArgumentError(ValueError):
     pass
 
-USE_PICKLE = True
-
+MODEL_NAME = "word2vec-google-news-300"
 
 @lru_cache()
 def cosine_sim(title1, title2):
@@ -78,34 +79,19 @@ if __name__ == '__main__':
 	
 	
 	''' LOAD MODEL '''
-	model_loaded = False
-	stdout.write("⏳ Loading word2vec-google-news-300 model... ")
+	stdout.write(f"⏳ Loading {MODEL_NAME}... ")
 	stdout.flush()
-	if USE_PICKLE:
-		try:
-			with open('word2vec-google-news-300.pkl', 'rb') as f:
-				model = pickle.load(f)
-			model_loaded = True
-		except Exception:
-			stdout.write('\nNo pickle found, loading model normally...')
-			stdout.flush()
-			pass
-	if not model_loaded:
-		from gensim.models import KeyedVectors
-		import gensim.downloader as api
-		try:
-			model = KeyedVectors.load_word2vec_format(expanduser("~/gensim-data/word2vec-google-news-300/word2vec-google-news-300.gz"), binary=True)
-			if USE_PICKLE:
-				with open('word2vec-google-news-300.pkl', 'wb') as f:
-					pickle.dump(model, f)
-				model_loaded = True
-				print('Model pickled for faster loading next time.')
-		except Exception as e:
-			stdout.write(f"\nError loading model: {e}\n")
-			stdout.flush()
-			model = api.load('word2vec-google-news-300')
-	stdout.write("Model loaded successfully. ✅\n")
-	stdout.flush()
+	try:
+		starting_time_model = perf_counter()
+		model = KeyedVectors.load_word2vec_format(expanduser(f"~/gensim-data/{MODEL_NAME}/{MODEL_NAME}.gz"), binary=True)
+		ending_time_model = perf_counter()
+	except Exception as e:
+		stdout.write(f"\nError loading model: {e}\n")
+		stdout.flush()
+		model = api.load(MODEL_NAME)
+	print("Model loaded successfully. ✅")
+	print(f"(loaded from local file in {ending_time_model - starting_time_model:.2f} seconds)")
+	print("-"*152)
 
 	if not is_dest_embedding_possible(dest_title):
 		raise IllegalArgumentError("Destination page title has no valid word embeddings in the model! Cannot compute similarity.")
