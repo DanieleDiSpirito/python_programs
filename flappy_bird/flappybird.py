@@ -6,12 +6,12 @@ pygame.init()
 pygame.mixer.init()
 
 #immagini:
-sfondo = pygame.image.load('C:/Users/danie/python_programs/pygame_games/Flappy Bird/sfondo.png')
-bird = pygame.image.load('C:/Users/danie/python_programs/pygame_games/Flappy Bird/uccello.png')
-base = pygame.image.load('C:/Users/danie/python_programs/pygame_games/Flappy Bird/base.png')
-tubo_giu = pygame.image.load('C:/Users/danie/python_programs/pygame_games/Flappy Bird/tubo.png')
+sfondo = pygame.image.load('sfondo.png')
+bird = pygame.image.load('uccello.png')
+base = pygame.image.load('base.png')
+tubo_giu = pygame.image.load('tubo.png')
 tubo_su = pygame.transform.flip(tubo_giu, False, True)
-gameover = pygame.image.load('C:/Users/danie/python_programs/pygame_games/Flappy Bird/gameover.png')
+gameover = pygame.image.load('gameover.png')
 
 #musica:
 #musica = pygame.mixer.music.load('C:/Users/Asus/Downloads/Flappy Bird Theme Song.mp3')
@@ -109,7 +109,7 @@ def record_punteggio():
     if (Record<punti):
         Record = punti
         scritta_record = 'new RECORD: ' + str(Record)
-        with open('C:/Users/danie/python_programs/pygame_games/Flappy Bird/record.txt', 'w') as file_:
+        with open('record.txt', 'w') as file_:
             print(Record, file=file_)
             file_.close()
     scrittura_record = SCRITTA_INIZIALE.render(str(scritta_record), 1, (0,0,0))
@@ -121,7 +121,7 @@ inizializza()
 SCHERMO.blit(sfondo, (0,0))
 SCHERMO.blit(bird, (birdx, birdy))
 SCHERMO.blit(base, (basex, 400))
-with open('C:/Users/danie/python_programs/pygame_games/Flappy Bird/record.txt', 'r') as file_:
+with open('record.txt', 'r') as file_:
     Record = int(file_.read())
     file_.close()
 
@@ -143,7 +143,7 @@ while True:
         birdy += bird_vely
         for event in pygame.event.get():
             if (event.type == pygame.KEYDOWN and event.key == pygame.K_UP):
-                bird_vely = -8;
+                bird_vely = -8
             if event.type == pygame.QUIT:
                 pygame.quit()
         if tubi[-1].x < 150: tubi.append(tubi_classe())

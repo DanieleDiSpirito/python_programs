@@ -2,16 +2,11 @@ import cv2
 import numpy as np
 import types
 import os
-#from google.colab.patches import cv2_imshow #utilizzabile solo su Google Colaboraty
 
 def messageToBinary(message):
     t = type(message)
     if t == str:
         return ''.join([format(ord(i), "08b") for i in message])
-        '''
-        08b -> b = binary -> 8 bits, 1 byte
-        ord(i) transform i in the Unicode code point
-        '''
     elif t == bytes or t == np.ndarray:
         return [format(i, "08b") for i in message]
     elif t == int or t == np.uint8:
@@ -20,18 +15,15 @@ def messageToBinary(message):
         raise TypeError("Input type not supported") 
     
 def hideData(image, secret_message):
-    #calculate the maximum bytes to encode
     n_bytes = image.shape[0] * image.shape[1] * 3 // 8
     print("Maximum bytes to encode:", n_bytes)
     
-    #check if number of bytes to encode is less than maximum image bytes
     if len(secret_message) > n_bytes:
         raise ValueError("Error encounted insufficient bytes, need bigger image or smaller secret message")
     
     secret_message += delimiter
 
     data_index = 0
-    #convert input data to binary format using messageToBinary() function
     binary_secret_msg = messageToBinary(secret_message)
     
     data_len = len(binary_secret_msg)
@@ -41,13 +33,13 @@ def hideData(image, secret_message):
             r, g, b = messageToBinary(pixel)
 
             #modify the LSB only if there is data to store
-            if data_index < data_len: #red
-                pixel[0] = int(r[:-1] + binary_secret_msg[data_index], 2) #2 is the base
+            if data_index < data_len: # red
+                pixel[0] = int(r[:-1] + binary_secret_msg[data_index], 2)
                 data_index += 1
-            if data_index < data_len: #green
+            if data_index < data_len: # green
                 pixel[1] = int(g[:-1] + binary_secret_msg[data_index], 2)
                 data_index += 1
-            if data_index < data_len: #blue
+            if data_index < data_len: # blue
                 pixel[2] = int(b[:-1] + binary_secret_msg[data_index], 2)
                 data_index += 1
             if data_index >= data_len: break
@@ -57,32 +49,26 @@ def hideData(image, secret_message):
 def showData(image):
     binary_data = ""
     for values in image:
-        for pixel in values: #pixel are 250'000 (500x500)
+        for pixel in values: # pixel are 250'000 (500x500)
             r, g, b = messageToBinary(pixel)
             binary_data += r[-1]
             binary_data += g[-1]
             binary_data += b[-1]
-    #split by 8-bits
     all_bytes = [binary_data[i: i+8] for i in range(0, len(binary_data), 8)]
-    #convert from bits to char
     decoded_data = ""
     for byte in all_bytes:
         decoded_data += chr(int(byte, 2))
-        if decoded_data[-5:] == delimiter: #check if we have reached the delimiter
+        if decoded_data[-5:] == delimiter: # check if we have reached the delimiter
             break
-    return decoded_data[:-5] #remove the delimiter
+    return decoded_data[:-5] # remove the delimiter
 
 def encode_text():
     image_name = input("Enter image (with extension): ")
     if image_name == '': image_name = 'pikachu.png'
-    image = cv2.imread(image_name) #read the input image using OpenCV-Python
+    image = cv2.imread(image_name)
 
-    #print("The shape of the image is: ", image.shape)
     data = input("Enter data to be encoded: ")
-    if len(data) == 0:
-        raise ValueError('Data is empty')
 
-#   os.chdir('C:\\Users\\Asus\\Desktop\\python_programs\\steganography\\encoded_image')
     filename = input("Enter the name of new encoded image (with extension): ")
     encoded_image = hideData(image, data)
     cv2.imwrite(filename, encoded_image)
@@ -124,20 +110,9 @@ def main():
     else:
         raise Exception("Enter correct input")
 
-#os.chdir('C:\\Users\\danie\\Desktop\\python_programs\\steganography')
 delimiter = "#####"
 
 try:
     main()
-except BaseException as error: #BaseException refers to all the exceptions/errors
+except BaseException as error: # BaseException refers to all the exceptions/errors
     print(error)
-
-#main()
-
-
-
-
-
-
-
-                
