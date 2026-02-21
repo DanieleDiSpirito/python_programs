@@ -52,5 +52,5 @@ for row in tqdm(range(height)):
             pixels[col,row] = rgb
         index = row * width + col + 1
 
-img.save('malderbrot_set.png')
-os.system('fim malderbrot_set.png')
+img.save('mandelbrot_set.png')
+os.system('fim mandelbrot_set.png')
