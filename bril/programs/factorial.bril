@@ -1,0 +1,15 @@
+@main(n: int) {
+	x: int = id n;
+	zero: int = const 0;
+	one: int = const 1;
+	result: int = id one;
+.cond:
+	b: bool = gt x zero;
+	br b .iter .stop;
+.iter:
+	result = mul result x;
+	x = sub x one;
+	jmp .cond;
+.stop:
+	print result;
+}

@@ -1,0 +1,18 @@
+@main {
+.entry:	
+	zero: int = const 0;
+	one: int = const 1;
+	cond: bool = gt one zero;
+	br cond .true .false;
+.true:
+	x1: int = add zero one;
+	set x3 x1;
+	jmp .end;
+.false:
+	x2: int = add zero one;
+	set x3 x2;
+	jmp .end;
+.end:
+	x3: int = get;
+	print x3;
+}

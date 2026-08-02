@@ -1,0 +1,101 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "label": "entry"
+        },
+        {
+          "dest": "zero",
+          "op": "const",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "dest": "one",
+          "op": "const",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "args": [
+            "one",
+            "zero"
+          ],
+          "dest": "cond",
+          "op": "gt",
+          "type": "bool"
+        },
+        {
+          "args": [
+            "cond"
+          ],
+          "labels": [
+            "true",
+            "false"
+          ],
+          "op": "br"
+        },
+        {
+          "label": "true"
+        },
+        {
+          "args": [
+            "zero",
+            "one"
+          ],
+          "dest": "x1",
+          "op": "add",
+          "type": "int"
+        },
+        {
+          "labels": [
+            "end"
+          ],
+          "op": "jmp"
+        },
+        {
+          "label": "false"
+        },
+        {
+          "args": [
+            "zero",
+            "one"
+          ],
+          "dest": "x2",
+          "op": "add",
+          "type": "int"
+        },
+        {
+          "labels": [
+            "end"
+          ],
+          "op": "jmp"
+        },
+        {
+          "label": "end"
+        },
+        {
+          "args": [
+            "x1",
+            "x2"
+          ],
+          "dest": "x3",
+          "labels": [
+            "true",
+            "false"
+          ],
+          "op": "phi",
+          "type": "int"
+        },
+        {
+          "args": [
+            "x3"
+          ],
+          "op": "print"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

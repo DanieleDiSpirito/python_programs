@@ -1,0 +1,93 @@
+{
+  "functions": [
+    {
+      "args": [
+        {
+          "name": "n",
+          "type": "int"
+        }
+      ],
+      "instrs": [
+        {
+          "dest": "x",
+          "op": "n",
+          "type": "int"
+        },
+        {
+          "dest": "zero",
+          "op": "const",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "dest": "one",
+          "op": "const",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "dest": "result",
+          "op": "one",
+          "type": "int"
+        },
+        {
+          "label": "cond"
+        },
+        {
+          "args": [
+            "x",
+            "zero"
+          ],
+          "dest": "b",
+          "op": "gt",
+          "type": "bool"
+        },
+        {
+          "args": [
+            "b"
+          ],
+          "labels": [
+            "iter",
+            "stop"
+          ],
+          "op": "br"
+        },
+        {
+          "label": "iter"
+        },
+        {
+          "args": [
+            "result",
+            "x"
+          ],
+          "dest": "result",
+          "op": "mul"
+        },
+        {
+          "args": [
+            "x",
+            "one"
+          ],
+          "dest": "x",
+          "op": "sub"
+        },
+        {
+          "labels": [
+            "cond"
+          ],
+          "op": "jmp"
+        },
+        {
+          "label": "stop"
+        },
+        {
+          "args": [
+            "result"
+          ],
+          "op": "print"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

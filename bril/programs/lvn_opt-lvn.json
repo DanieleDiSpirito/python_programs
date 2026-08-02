@@ -1,0 +1,39 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "dest": "v01",
+          "op": "const",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "dest": "v02",
+          "op": "const",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "args": [
+            "v01",
+            "v02"
+          ],
+          "dest": "v03",
+          "op": "add",
+          "type": "int"
+        },
+        {
+          "args": [
+            "v03",
+            "v03"
+          ],
+          "dest": "v04",
+          "op": "mul",
+          "type": "int"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+// Control Flow Graph
+digraph {
+	nodesep=0.6 rankdir=TB ranksep=0.6
+	node [align=left color="#4a5568" fillcolor="#f4f7f6" fontname="Courier New" fontsize=10 shape=box style="filled,rounded"]
+	edge [arrowhead=vee arrowsize=0.8 color="#718096" penwidth=1.2]
+	main [label=".main
+x: int = n 
+zero: int = const 0
+one: int = const 1
+result: int = one "]
+	cond [label=".cond
+b: bool = gt x zero
+br b .iter .stop"]
+	iter [label=".iter
+result = mul result x
+x = sub x one
+jmp  .cond"]
+	stop [label=".stop
+print result"]
+	main -> cond
+	cond -> stop
+	cond -> iter
+	iter -> cond
+}

@@ -1,0 +1,6 @@
+@main {
+  v01: int = const 3;
+  v02: int = const 4;
+  v03: int = add v01 v02;
+  v04: int = mul v03 v03;
+}

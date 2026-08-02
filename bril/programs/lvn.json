@@ -1,0 +1,61 @@
+{
+  "functions": [
+    {
+      "instrs": [
+        {
+          "dest": "a",
+          "op": "const",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "dest": "b",
+          "op": "const",
+          "type": "int",
+          "value": 4
+        },
+        {
+          "dest": "g",
+          "op": "const",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "args": [
+            "a",
+            "b"
+          ],
+          "dest": "c",
+          "op": "add",
+          "type": "int"
+        },
+        {
+          "args": [
+            "c"
+          ],
+          "dest": "d",
+          "op": "id",
+          "type": "int"
+        },
+        {
+          "args": [
+            "d"
+          ],
+          "dest": "e",
+          "op": "id",
+          "type": "int"
+        },
+        {
+          "args": [
+            "d",
+            "e"
+          ],
+          "dest": "f",
+          "op": "mul",
+          "type": "int"
+        }
+      ],
+      "name": "main"
+    }
+  ]
+}
